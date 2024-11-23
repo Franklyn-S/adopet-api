@@ -1,5 +1,6 @@
 package br.com.alura.adopet.api.infra.exception;
 
+import br.com.alura.adopet.api.exception.ValidacaoException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,13 @@ public class TratadorDeErros {
 	public ResponseEntity<String> tratarErrorRegraDeNegocio(ValidationException ex) {
 		return ResponseEntity.badRequest().body(ex.getMessage());
 	}
+
+	@ExceptionHandler(ValidacaoException.class)
+	public ResponseEntity<String> tratarErrorRegraDeNegocio(ValidacaoException ex) {
+		return ResponseEntity.badRequest().body(ex.getMessage());
+	}
+
+
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<String> tratarErro400(HttpMessageNotReadableException ex) {

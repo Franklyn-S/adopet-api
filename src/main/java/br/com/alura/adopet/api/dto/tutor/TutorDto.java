@@ -2,13 +2,13 @@ package br.com.alura.adopet.api.dto.tutor;
 
 import br.com.alura.adopet.api.model.Tutor;
 
-public record DadosDetalhesTutor(
+public record TutorDto(
 		Long id,
 		String nome,
 		String telefone,
 		String email
 ) {
-	public DadosDetalhesTutor(Tutor tutor) {
+	public TutorDto(Tutor tutor) {
 		this(
 				tutor.getId(),
 				tutor.getNome(),

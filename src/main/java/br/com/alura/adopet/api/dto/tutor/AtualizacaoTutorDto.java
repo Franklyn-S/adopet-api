@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
-public record DadosAtualizarTutor(
+public record AtualizacaoTutorDto(
 		@NotNull Long id,
 		@NotBlank String nome,
 

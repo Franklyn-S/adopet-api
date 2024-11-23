@@ -1,8 +1,8 @@
 package br.com.alura.adopet.api.service;
 
-import br.com.alura.adopet.api.dto.tutor.DadosAtualizarTutor;
-import br.com.alura.adopet.api.dto.tutor.DadosCadastroTutor;
-import br.com.alura.adopet.api.dto.tutor.DadosDetalhesTutor;
+import br.com.alura.adopet.api.dto.tutor.AtualizacaoTutorDto;
+import br.com.alura.adopet.api.dto.tutor.CadastroTutorDto;
+import br.com.alura.adopet.api.dto.tutor.TutorDto;
 import br.com.alura.adopet.api.exception.ValidacaoException;
 import br.com.alura.adopet.api.model.Tutor;
 import br.com.alura.adopet.api.repository.TutorRepository;
@@ -11,28 +11,22 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TutorService {
+
 	@Autowired
 	private TutorRepository repository;
 
-	public DadosDetalhesTutor cadastrarTutor(DadosCadastroTutor dto) {
-		Tutor tutor = new Tutor(dto);
-		boolean telefoneJaCadastrado = repository.existsByTelefone(tutor.getTelefone());
-		boolean emailJaCadastrado = repository.existsByEmail(tutor.getEmail());
-
-		if (telefoneJaCadastrado || emailJaCadastrado) {
+	public TutorDto cadastrarTutor(CadastroTutorDto dto) {
+		boolean dadosJaCadastrados = repository.existsByTelefoneOrEmail(dto.telefone(), dto.email());
+		if (dadosJaCadastrados) {
 			throw new ValidacaoException("Dados já cadastrados para outro tutor!");
-		} else {
-			repository.save(tutor);
-			return new DadosDetalhesTutor(tutor);
 		}
+		Tutor tutor = new Tutor(dto);
+		repository.save(tutor);
+		return new TutorDto(tutor);
 	}
 
-	public void atualizarTutor(DadosAtualizarTutor dto) {
+	public void atualizarTutor(AtualizacaoTutorDto dto) {
 		Tutor tutor = repository.getReferenceById(dto.id());
-		if (tutor == null) {
-			throw new ValidacaoException("Nenhum tutor encontrado!");
-		}
 		tutor.atualizar(dto);
-		repository.save(tutor);
 	}
 }
