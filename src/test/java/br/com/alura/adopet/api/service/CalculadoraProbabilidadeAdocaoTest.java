@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CalculadoraProbabilidadeAdocaoTest {
 
-
 	@Test
 	@DisplayName("Probabilidade alta para gatos jovens com peso baixo")
 	void probabilidadeAltaCenario1() {
