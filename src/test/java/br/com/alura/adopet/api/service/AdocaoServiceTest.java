@@ -1,5 +1,7 @@
 package br.com.alura.adopet.api.service;
 
+import br.com.alura.adopet.api.dto.AprovacaoAdocaoDto;
+import br.com.alura.adopet.api.dto.ReprovacaoAdocaoDto;
 import br.com.alura.adopet.api.dto.SolicitacaoAdocaoDto;
 import br.com.alura.adopet.api.model.Abrigo;
 import br.com.alura.adopet.api.model.Adocao;
@@ -16,6 +18,8 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +39,9 @@ class AdocaoServiceTest {
 
 	@Mock
 	private Tutor tutor;
+
+	@Mock
+	private Adocao adocao;
 
 	@Mock
 	private Abrigo abrigo;
@@ -61,6 +68,10 @@ class AdocaoServiceTest {
 	private ValidacaoSolicitacaoAdocao validador2;
 
 	private SolicitacaoAdocaoDto dto;
+
+	private AprovacaoAdocaoDto aprovacaoAdocaoDto;
+
+	private ReprovacaoAdocaoDto reprovacaoAdocaoDto;
 
 	@Captor
 	private ArgumentCaptor<Adocao> adocaoCaptor;
@@ -119,4 +130,85 @@ class AdocaoServiceTest {
 				"Olá " +adocaoSalva.getPet().getAbrigo().getNome() +"!\n\nUma solicitação de adoção foi registrada hoje para o pet: " +adocaoSalva.getPet().getNome() +". \nFavor avaliar para aprovação ou reprovação."
 		);
 	}
+
+	@Test
+	void deveriaMarcarComoAprovadoAoAprovar() {
+		// ARRANGE
+		this.aprovacaoAdocaoDto = new AprovacaoAdocaoDto(1L);
+		given(adocaoRepository.getReferenceById(aprovacaoAdocaoDto.idAdocao())).willReturn(adocao);
+		given(adocao.getPet()).willReturn(pet);
+		given(adocao.getData()).willReturn(LocalDateTime.now());
+		given(pet.getAbrigo()).willReturn(abrigo);
+		given(adocao.getTutor()).willReturn(tutor);
+
+		// ACT
+		adocaoService.aprovar(aprovacaoAdocaoDto);
+
+		//ASSERT
+		then(adocao).should().marcarComoAprovada();
+	}
+
+	@Test
+	void deveriaEnviarEmailAoAprovar() {
+		// ARRANGE
+		this.aprovacaoAdocaoDto = new AprovacaoAdocaoDto(1L);
+		given(adocaoRepository.getReferenceById(aprovacaoAdocaoDto.idAdocao())).willReturn(adocao);
+		given(adocao.getPet()).willReturn(pet);
+		given(adocao.getData()).willReturn(LocalDateTime.now());
+		given(pet.getAbrigo()).willReturn(abrigo);
+		given(adocao.getTutor()).willReturn(tutor);
+
+		// ACT
+		adocaoService.aprovar(aprovacaoAdocaoDto);
+
+		//ASSERT
+		then(emailService).should().enviarEmail(
+				adocao.getPet().getAbrigo().getEmail(),
+				"Adoção aprovada",
+				"Parabéns " +adocao.getTutor().getNome() +"!\n\nSua adoção do pet " +adocao.getPet().getNome() +", solicitada em " +adocao.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) +", foi aprovada.\nFavor entrar em contato com o abrigo " +adocao.getPet().getAbrigo().getNome() +" para agendar a busca do seu pet."
+		);
+	}
+
+	@Test
+	void deveriaMarcarComoReprovadoAoReprovar() {
+		// ARRANGE
+		var justificativa = "Justificativa";
+		this.reprovacaoAdocaoDto = new ReprovacaoAdocaoDto(1L, justificativa);
+		given(adocaoRepository.getReferenceById(reprovacaoAdocaoDto.idAdocao())).willReturn(adocao);
+		given(adocao.getPet()).willReturn(pet);
+		given(adocao.getData()).willReturn(LocalDateTime.now());
+		given(pet.getAbrigo()).willReturn(abrigo);
+		given(adocao.getTutor()).willReturn(tutor);
+
+		// ACT
+		adocaoService.reprovar(reprovacaoAdocaoDto);
+
+		//ASSERT
+		then(adocao).should().marcarComoReprovada(justificativa);
+	}
+
+	@Test
+	void deveriaEnviarEmailAoReprovar() {
+		// ARRANGE
+		var justificativa = "Justificativa";
+		this.reprovacaoAdocaoDto = new ReprovacaoAdocaoDto(1L, justificativa);
+		given(adocaoRepository.getReferenceById(reprovacaoAdocaoDto.idAdocao())).willReturn(adocao);
+		given(adocao.getPet()).willReturn(pet);
+		given(adocao.getData()).willReturn(LocalDateTime.now());
+		given(pet.getAbrigo()).willReturn(abrigo);
+		given(adocao.getTutor()).willReturn(tutor);
+
+		// ACT
+		adocaoService.reprovar(reprovacaoAdocaoDto);
+
+		//ASSERT
+		then(emailService).should().enviarEmail(
+				adocao.getPet().getAbrigo().getEmail(),
+				"Solicitação de adoção",
+				"Olá " +adocao.getTutor().getNome() +"!\n\nInfelizmente sua adoção do pet " +adocao.getPet().getNome() +", solicitada em " +adocao.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) +", foi reprovada pelo abrigo " +adocao.getPet().getAbrigo().getNome() +" com a seguinte justificativa: " +adocao.getJustificativaStatus()
+		);
+	}
+
+
+
 }

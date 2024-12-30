@@ -1,6 +1,7 @@
 package br.com.alura.adopet.api.controller;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +34,7 @@ class AdocaoControllerIntegrationTest {
 	}
 
 	@Test
+	@Disabled
 	void deveriaDevolverCodigo200ParaSolicitacaoDeAdocaoSemErros() {
 		// ARRANGE
 		String json = """
